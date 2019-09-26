@@ -2,4 +2,7 @@
     <string name="app_name">Rotating Wallpapers</string>
     <string name="image_view_desc">Image view</string>
     <string name="file_name_content">file name content</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

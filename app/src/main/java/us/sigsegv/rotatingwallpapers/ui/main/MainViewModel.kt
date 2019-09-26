@@ -8,6 +8,7 @@ import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
 import android.util.SparseArray
+import androidx.core.util.containsValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
@@ -16,7 +17,7 @@ import java.io.*
 class MainViewModel() : ViewModel() {
 
     private var inputPFD: ParcelFileDescriptor? = null
-    private val fileList: SparseArray<File> = SparseArray()
+    private val fileList: SparseArray<File> = SparseArray(1000)
     private var internalRecyclerAdapter: FilesRecyclerAdapter? = null
     var context: Context? = null
 
@@ -45,7 +46,7 @@ class MainViewModel() : ViewModel() {
         return fileList.size()
     }
 
-    fun getImageFileForPosition(position: Int): File {
+    fun getImageFileForPosition(position: Int): File? {
         return fileList.get(position)
     }
 
@@ -99,7 +100,9 @@ class MainViewModel() : ViewModel() {
                     FileUtils.copy(bufferedInputStream, bufferedOutputStream)
                     bufferedInputStream.close()
                     bufferedOutputStream.close()
-                    fileList.append(fileList.size(), file)
+                    if(!fileList.containsValue(file)) {
+                        fileList.append(fileList.size(), file)
+                    }
                 }
             }
             inputPFD?.close()

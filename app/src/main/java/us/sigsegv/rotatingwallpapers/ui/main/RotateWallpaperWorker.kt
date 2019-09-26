@@ -2,8 +2,9 @@ package us.sigsegv.rotatingwallpapers.ui.main
 
 import android.app.WallpaperManager
 import android.content.Context
-import android.os.Build
+import android.graphics.Point
 import android.util.Log
+import android.view.WindowManager
 import androidx.core.graphics.scale
 import androidx.work.ListenableWorker
 import androidx.work.Worker
@@ -11,12 +12,6 @@ import androidx.work.WorkerParameters
 import com.squareup.picasso.Picasso
 import java.io.File
 import java.util.*
-import android.view.Display
-import androidx.core.content.ContextCompat.getSystemService
-import android.view.WindowManager
-import android.R.attr.y
-import android.R.attr.x
-import android.graphics.Point
 
 
 class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters) :

@@ -3,9 +3,11 @@ package us.sigsegv.rotatingwallpapers.ui.main
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import us.sigsegv.rotatingwallpapers.R
+import java.io.File
 
 class FilesRecyclerAdapter(val model: MainViewModel) : RecyclerView.Adapter<ImageFileViewHolder>() {
     init {
@@ -25,12 +27,21 @@ class FilesRecyclerAdapter(val model: MainViewModel) : RecyclerView.Adapter<Imag
     }
 
     override fun onBindViewHolder(holder: ImageFileViewHolder, position: Int) {
-        val f = model.getImageFileForPosition(position)
-        holder.file = f
-        holder.model = model
-        holder.textView.text = f.name
-        Picasso.with(holder.imageView.context)
-            .load(f)
-            .into(holder.imageView)
+        val f : File? = model.getImageFileForPosition(position)
+        if(f != null) {
+            holder.file = f
+            holder.model = model
+            holder.textView.text = f.name
+            Picasso.with(holder.imageView.context)
+                .load(f)
+                .into(holder.imageView)
+            holder.itemView.setOnClickListener {
+                Log.v("FilesRecyclerAdapter", "Clicked!")
+                (it.context as AppCompatActivity).supportFragmentManager.beginTransaction()
+                    .replace(R.id.container, DetailFragment.newInstance(f.toURI().toString()))
+                    .addToBackStack("detail")
+                    .commit()
+            }
+        }
     }
 }

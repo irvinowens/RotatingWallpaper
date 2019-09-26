@@ -40,6 +40,7 @@ class MainFragment : Fragment() {
         }
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         viewModel.context = context
+        recyclerAdapter = FilesRecyclerAdapter(viewModel)
         recyclerView = activity?.findViewById(R.id.imagesRecycler)
         fab = activity?.findViewById(R.id.floatingActionButton)
         if(fab != null) {
@@ -47,7 +48,6 @@ class MainFragment : Fragment() {
                 requestImage()
             })
         }
-        recyclerAdapter = FilesRecyclerAdapter(viewModel)
         if(recyclerView != null) {
             val llm = LinearLayoutManager(context)
             llm.orientation = LinearLayoutManager.VERTICAL
