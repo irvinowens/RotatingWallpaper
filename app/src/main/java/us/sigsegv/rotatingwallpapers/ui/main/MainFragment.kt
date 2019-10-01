@@ -1,8 +1,10 @@
 package us.sigsegv.rotatingwallpapers.ui.main
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,14 +35,27 @@ class MainFragment : Fragment() {
         return inflater.inflate(R.layout.main_fragment, container, false)
     }
 
+    /**
+     * Called when the fragment's activity has been created and this
+     * fragment's view hierarchy instantiated.  It can be used to do final
+     * initialization once these pieces are in place, such as retrieving
+     * views or restoring state.  It is also useful for fragments that use
+     * [.setRetainInstance] to retain their instance,
+     * as this callback tells the fragment when it is fully associated with
+     * the new activity instance.  This is called after [.onCreateView]
+     * and before [.onViewStateRestored].
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        requestFileIntent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
-        }
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         viewModel.context = context
         recyclerAdapter = FilesRecyclerAdapter(viewModel)
+        requestFileIntent = Intent(Intent.ACTION_PICK).apply {
+            type = "image/*"
+        }
         recyclerView = activity?.findViewById(R.id.imagesRecycler)
         fab = activity?.findViewById(R.id.floatingActionButton)
         if(fab != null) {
@@ -54,11 +69,23 @@ class MainFragment : Fragment() {
             recyclerView?.layoutManager = llm
             recyclerView?.adapter = recyclerAdapter
         }
-        viewModel.load(recyclerAdapter)
+    }
+
+    /**
+     * Called when the fragment is visible to the user and actively running.
+     * This is generally
+     * tied to [Activity.onResume] of the containing
+     * Activity's lifecycle.
+     */
+    override fun onResume() {
+        super.onResume()
+        if(viewModel.fileList.isEmpty()) {
+            viewModel.load(recyclerAdapter)
+        }
     }
 
     private fun requestImage() {
-        startActivityForResult(requestFileIntent, 0)
+        startActivityForResult(requestFileIntent, 716)
     }
 
     /*
@@ -74,6 +101,12 @@ class MainFragment : Fragment() {
             // Exit without doing anything else
             return
         }
-        viewModel.fetchImageAndSave(data, recyclerAdapter)
+        if (requestCode == 716) {
+            viewModel.fetchImageAndSave(data, recyclerAdapter)
+            Log.v("MainFragment", "Adding image")
+        } else {
+            // normal launch, ignoring
+            Log.v("MainFragment", "Normal Launch Ignoring")
+        }
     }
 }

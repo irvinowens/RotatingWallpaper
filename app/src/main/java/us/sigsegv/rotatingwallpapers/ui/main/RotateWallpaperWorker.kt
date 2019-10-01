@@ -53,12 +53,11 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
                 display.getSize(size)
                 val displayWidth = size.x
                 val displayHeight = size.y
-                wallpaperManager.setBitmap(Picasso.with(applicationContext).load(File(applicationContext.filesDir,
+                val bitmap = Picasso.with(applicationContext).load(File(applicationContext.filesDir,
                     dir[randomInt]
-                )).get().scale(displayWidth, displayHeight, false), null, true, WallpaperManager.FLAG_LOCK)
-                wallpaperManager.setBitmap(Picasso.with(applicationContext).load(File(applicationContext.filesDir,
-                    dir[randomInt]
-                )).get().scale(displayWidth, displayHeight, false), null, true, WallpaperManager.FLAG_SYSTEM)
+                )).get().scale(displayWidth, displayHeight, false)
+                wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_LOCK)
+                wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
                 Log.d("RotateWallpaperWorker", "Rotated wallpaper")
                 return Result.success()
             }

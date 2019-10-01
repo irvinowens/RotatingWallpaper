@@ -13,6 +13,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.scale
+import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.sample_image_cell_view.view.*
 
@@ -76,9 +77,17 @@ class DetailFragment : Fragment() {
                 .resize(displayWidth, displayHeight).into(image)
             image?.setOnClickListener(View.OnClickListener {
                 listener!!.onFragmentInteraction(Uri.parse(imageUri))
+                showSnackbar("Changed wallpaper")
             })
         } else {
             Log.v("DetailFragment", "Image uri was null")
+        }
+    }
+
+    private fun showSnackbar(text: String) {
+        val view : View? = activity?.findViewById(R.id.detailImageView)
+        if(view != null) {
+            Snackbar.make(view, text, Snackbar.LENGTH_LONG).show()
         }
     }
 

@@ -7,17 +7,21 @@ import android.os.FileUtils
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
-import android.util.SparseArray
-import androidx.core.util.containsValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.*
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.WorkManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.*
+import java.util.concurrent.TimeUnit
 
 class MainViewModel() : ViewModel() {
 
     private var inputPFD: ParcelFileDescriptor? = null
-    private val fileList: SparseArray<File> = SparseArray(1000)
+    internal val fileList: ArrayList<File> = ArrayList(20)
     private var internalRecyclerAdapter: FilesRecyclerAdapter? = null
     var context: Context? = null
 
@@ -36,18 +40,18 @@ class MainViewModel() : ViewModel() {
         if(files != null) {
             var i = 0
             while(files.hasNext()) {
-                fileList.append(i, files.next())
+                fileList.add(files.next())
                 i++
             }
         }
     }
 
     fun getFileCount() : Int {
-        return fileList.size()
+        return fileList.size
     }
 
     fun getImageFileForPosition(position: Int): File? {
-        return fileList.get(position)
+        return fileList[position]
     }
 
     suspend fun getImageAndSave(data: Intent?) = withContext(Dispatchers.IO) {
@@ -96,12 +100,18 @@ class MainViewModel() : ViewModel() {
                     cursor.close()
                     val bufferedInputStream = BufferedInputStream(FileInputStream(fd))
                     val file = File(context!!.filesDir, fileName)
+                    if(file.exists()) {
+                        Log.i("MainViewModel", "File exists")
+                        bufferedInputStream.close()
+                        inputPFD?.close()
+                        return@withContext
+                    }
                     val bufferedOutputStream = BufferedOutputStream(FileOutputStream(file))
                     FileUtils.copy(bufferedInputStream, bufferedOutputStream)
                     bufferedInputStream.close()
                     bufferedOutputStream.close()
-                    if(!fileList.containsValue(file)) {
-                        fileList.append(fileList.size(), file)
+                    if(!fileList.contains(file)) {
+                        fileList.add(file)
                     }
                 }
             }
@@ -114,7 +124,7 @@ class MainViewModel() : ViewModel() {
         viewModelScope.launch {
             val saving = async {getImageAndSave(data) }
             saving.await()
-            recyclerAdapter?.notifyItemInserted(fileList.size())
+            recyclerAdapter?.notifyItemInserted(fileList.size)
         }
     }
 
@@ -122,14 +132,50 @@ class MainViewModel() : ViewModel() {
         viewModelScope.launch {
             val deleting = async { asyncDeleteFile(file) }
             deleting.await()
-            val index = fileList.indexOfValue(file)
-            internalRecyclerAdapter?.notifyItemRemoved(index)
-            fileList.removeAt(index)
+            val index = fileList.indexOf(file)
+            if(index != -1) {
+                internalRecyclerAdapter?.notifyItemRemoved(index)
+                fileList.removeAt(index)
+            } else {
+                internalRecyclerAdapter?.notifyDataSetChanged()
+            }
         }
     }
 
     suspend fun asyncDeleteFile(file: File) = withContext(Dispatchers.IO) {
         file.delete()
         Log.d("MainViewModel", "File deleted")
+    }
+
+    fun stopWork(context: Context) {
+        WorkManager.getInstance(context.applicationContext).cancelUniqueWork("Rotation")
+    }
+
+    fun startWork(context : Context){
+        // our work is always going to adjust with the content
+        // but we do not want to start new work if work already has been started
+        val workInfos = WorkManager.getInstance(context.applicationContext).getWorkInfosForUniqueWork("Rotation")
+        if(workInfos.get().isEmpty() || workInfos.isCancelled) {
+            val constraints = androidx.work.Constraints.Builder()
+                .setRequiresCharging(false)
+                .setRequiresDeviceIdle(true)
+                .build()
+            val saveRequest =
+                androidx.work.PeriodicWorkRequest.Builder(
+                    RotateWallpaperWorker::class.java,
+                    24, TimeUnit.HOURS, 1, TimeUnit.HOURS
+                )
+                    .setConstraints(constraints)
+                    .addTag("Rotation")
+                    .build()
+
+            WorkManager.getInstance(context.applicationContext)
+                .enqueueUniquePeriodicWork("Rotation",
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    saveRequest)
+            Log.d("MainViewModel", "Work started")
+        } else {
+            Log.d("MainViewModel", "We have already started the work")
+        }
     }
 }

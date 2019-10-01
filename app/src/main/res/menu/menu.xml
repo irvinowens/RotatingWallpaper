@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainmenu"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_play"
+        android:icon="@android:drawable/ic_media_play"
+        android:title="@string/action_start_work"
+        app:showAsAction="ifRoom"/>
+
+    <!-- Settings, should always be in the overflow -->
+    <item android:id="@+id/action_pause"
+        android:icon="@android:drawable/ic_media_pause"
+        android:title="@string/action_pause_work"
+        app:showAsAction="ifRoom"/>
+</menu>

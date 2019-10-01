@@ -10,9 +10,6 @@ import us.sigsegv.rotatingwallpapers.R
 import java.io.File
 
 class FilesRecyclerAdapter(val model: MainViewModel) : RecyclerView.Adapter<ImageFileViewHolder>() {
-    init {
-        model.load(this)
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageFileViewHolder {
         return ImageFileViewHolder(LayoutInflater
