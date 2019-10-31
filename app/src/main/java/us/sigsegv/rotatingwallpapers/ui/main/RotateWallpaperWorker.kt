@@ -2,7 +2,9 @@ package us.sigsegv.rotatingwallpapers.ui.main
 
 import android.app.WallpaperManager
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Point
+import android.graphics.Rect
 import android.util.Log
 import android.view.WindowManager
 import androidx.core.graphics.scale
@@ -53,12 +55,14 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
                 display.getSize(size)
                 val displayWidth = size.x
                 val displayHeight = size.y
+                //val rect = Rect(0, 0, displayWidth, displayHeight)
                 val bitmap = Picasso.with(applicationContext).load(File(applicationContext.filesDir,
                     dir[randomInt]
-                )).get().scale(displayWidth, displayHeight, false)
+                )).resize(displayWidth, displayHeight).centerCrop().get()
                 wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_LOCK)
                 wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
                 Log.d("RotateWallpaperWorker", "Rotated wallpaper")
+                bitmap.recycle()
                 return Result.success()
             }
         } else {
@@ -66,4 +70,26 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
             return Result.failure()
         }
     }
+
+    fun transform(source: Bitmap): Bitmap {
+        val isLandscape = source.width > source.height
+
+        val newWidth: Int
+        val newHeight: Int
+        if (isLandscape) {
+            newWidth = 1080
+            newHeight = Math.round(newWidth.toFloat() / source.width * source.height)
+        } else {
+            newHeight = 2280
+            newWidth = Math.round(newHeight.toFloat() / source.height * source.width)
+        }
+
+        val result = Bitmap.createScaledBitmap(source, newWidth, newHeight, false)
+
+        if (result != source)
+            source.recycle()
+
+        return result
+    }
+
 }

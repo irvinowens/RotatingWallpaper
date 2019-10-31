@@ -21,7 +21,6 @@ import us.sigsegv.rotatingwallpapers.R
 import java.io.File
 import java.net.URI
 
-// TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_FILE_URI = "file_uri"
 
@@ -73,7 +72,7 @@ class DetailFragment : Fragment() {
             display?.getSize(size)
             val displayWidth = size.x
             val displayHeight = size.y
-            Picasso.with(context?.applicationContext).load(imageUri!!)
+            Picasso.with(context?.applicationContext).load(imageUri!!).centerCrop()
                 .resize(displayWidth, displayHeight).into(image)
             image?.setOnClickListener(View.OnClickListener {
                 listener!!.onFragmentInteraction(Uri.parse(imageUri))
