@@ -3,17 +3,15 @@ package us.sigsegv.rotatingwallpapers.ui.main
 import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Point
-import android.graphics.Rect
 import android.util.Log
-import android.view.WindowManager
-import androidx.core.graphics.scale
 import androidx.work.ListenableWorker
+import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.squareup.picasso.Picasso
 import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters) :
@@ -49,20 +47,15 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
                 val min = 0
                 val max = dir.size - 1
                 val randomInt = random.nextInt((max - min) + 1) + min
-                val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                val display = wm.defaultDisplay
-                val size = Point()
-                display.getSize(size)
-                val displayWidth = size.x
-                val displayHeight = size.y
-                //val rect = Rect(0, 0, displayWidth, displayHeight)
                 val bitmap = Picasso.with(applicationContext).load(File(applicationContext.filesDir,
                     dir[randomInt]
-                )).resize(displayWidth, displayHeight).centerCrop().get()
-                wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_LOCK)
-                wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
+                )).get()
+                wallpaperManager.setBitmap(bitmap, null, true,
+                    WallpaperManager.FLAG_LOCK or
+                            WallpaperManager.FLAG_SYSTEM)
                 Log.d("RotateWallpaperWorker", "Rotated wallpaper")
                 bitmap.recycle()
+                startWork(applicationContext)
                 return Result.success()
             }
         } else {
@@ -90,6 +83,34 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
             source.recycle()
 
         return result
+    }
+
+    fun startWork(context : Context){
+        WorkManager.getInstance(context.applicationContext).cancelAllWork()
+        val currentDate = Calendar.getInstance()
+        val dueDate = Calendar.getInstance()
+        // set execution around 00:00:00
+        dueDate.set(Calendar.HOUR_OF_DAY, 0)
+        dueDate.set(Calendar.MINUTE, 0)
+        dueDate.set(Calendar.SECOND, 0)
+
+        if (dueDate.before(currentDate)) {
+            dueDate.add(Calendar.HOUR_OF_DAY, 24)
+        }
+
+        val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
+
+        val saveRequest =
+            androidx.work.OneTimeWorkRequest.Builder(
+                RotateWallpaperWorker::class.java
+            )
+                .addTag("Rotation")
+                .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
+                .build()
+
+        WorkManager.getInstance(context.applicationContext)
+            .enqueue(saveRequest)
+        Log.d("MainViewModel", "Work started")
     }
 
 }

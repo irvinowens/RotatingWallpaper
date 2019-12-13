@@ -90,8 +90,9 @@ class MainActivity : AppCompatActivity(),
         val displayHeight = size.y
         val wallpaperManager = WallpaperManager.getInstance(applicationContext)
         val bitmap = Picasso.with(applicationContext).load(uri).get().scale(displayWidth, displayHeight, false)
-        wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_LOCK)
-        wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
+        wallpaperManager.setBitmap(bitmap, null, true,
+            WallpaperManager.FLAG_LOCK or
+                    WallpaperManager.FLAG_SYSTEM)
         Log.d("RotateWallpaperWorker", "Rotated wallpaper")
         showSnackbar("Wallpaper selected")
     }

@@ -5,21 +5,14 @@ import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.ImageView
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.graphics.scale
+import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.sample_image_cell_view.view.*
-
 import us.sigsegv.rotatingwallpapers.R
-import java.io.File
-import java.net.URI
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_FILE_URI = "file_uri"
@@ -70,10 +63,7 @@ class DetailFragment : Fragment() {
             val display = wm?.defaultDisplay
             val size = Point()
             display?.getSize(size)
-            val displayWidth = size.x
-            val displayHeight = size.y
-            Picasso.with(context?.applicationContext).load(imageUri!!).centerCrop()
-                .resize(displayWidth, displayHeight).into(image)
+            Picasso.with(context?.applicationContext).load(imageUri!!).into(image)
             image?.setOnClickListener(View.OnClickListener {
                 listener!!.onFragmentInteraction(Uri.parse(imageUri))
                 showSnackbar("Changed wallpaper")

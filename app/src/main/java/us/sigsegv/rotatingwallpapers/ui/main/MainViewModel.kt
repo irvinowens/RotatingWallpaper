@@ -9,14 +9,15 @@ import android.provider.OpenableColumns
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.*
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 class MainViewModel() : ViewModel() {
 
@@ -152,30 +153,29 @@ class MainViewModel() : ViewModel() {
     }
 
     fun startWork(context : Context){
-        // our work is always going to adjust with the content
-        // but we do not want to start new work if work already has been started
-        val workInfos = WorkManager.getInstance(context.applicationContext).getWorkInfosForUniqueWork("Rotation")
-        if(workInfos.get().isEmpty() || workInfos.isCancelled) {
-            val constraints = androidx.work.Constraints.Builder()
-                .setRequiresCharging(false)
-                .setRequiresDeviceIdle(true)
-                .build()
-            val saveRequest =
-                androidx.work.PeriodicWorkRequest.Builder(
-                    RotateWallpaperWorker::class.java,
-                    24, TimeUnit.HOURS, 1, TimeUnit.HOURS
-                )
-                    .setConstraints(constraints)
-                    .addTag("Rotation")
-                    .build()
+        WorkManager.getInstance(context.applicationContext).cancelAllWork()
+        val currentDate = Calendar.getInstance()
+        val dueDate = Calendar.getInstance()
+        // set execution around 00:00:00
+        dueDate.set(Calendar.HOUR_OF_DAY, 0)
+        dueDate.set(Calendar.MINUTE, 0)
+        dueDate.set(Calendar.SECOND, 0)
 
-            WorkManager.getInstance(context.applicationContext)
-                .enqueueUniquePeriodicWork("Rotation",
-                    ExistingPeriodicWorkPolicy.REPLACE,
-                    saveRequest)
-            Log.d("MainViewModel", "Work started")
-        } else {
-            Log.d("MainViewModel", "We have already started the work")
+        if (dueDate.before(currentDate)) {
+            dueDate.add(Calendar.HOUR_OF_DAY, 24)
         }
+
+        val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
+        val saveRequest =
+            androidx.work.OneTimeWorkRequest.Builder(
+                RotateWallpaperWorker::class.java
+            )
+                .addTag("Rotation")
+                .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
+                .build()
+
+        WorkManager.getInstance(context.applicationContext)
+            .enqueue(saveRequest)
+        Log.d("MainViewModel", "Work started")
     }
 }
