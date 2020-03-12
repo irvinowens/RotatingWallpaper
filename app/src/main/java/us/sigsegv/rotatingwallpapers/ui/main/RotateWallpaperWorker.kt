@@ -3,7 +3,9 @@ package us.sigsegv.rotatingwallpapers.ui.main
 import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Point
 import android.util.Log
+import android.view.WindowManager
 import androidx.work.ListenableWorker
 import androidx.work.WorkManager
 import androidx.work.Worker
@@ -12,6 +14,7 @@ import com.squareup.picasso.Picasso
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 
 
 class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters) :
@@ -47,9 +50,9 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
                 val min = 0
                 val max = dir.size - 1
                 val randomInt = random.nextInt((max - min) + 1) + min
-                val bitmap = Picasso.with(applicationContext).load(File(applicationContext.filesDir,
+                val bitmap = transform(Picasso.with(applicationContext).load(File(applicationContext.filesDir,
                     dir[randomInt]
-                )).get()
+                )).get())
                 wallpaperManager.setBitmap(bitmap, null, true,
                     WallpaperManager.FLAG_LOCK or
                             WallpaperManager.FLAG_SYSTEM)
@@ -64,23 +67,24 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
         }
     }
 
-    fun transform(source: Bitmap): Bitmap {
+    private fun transform(source: Bitmap): Bitmap {
+        val windowManager: WindowManager = applicationContext
+            .getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowSizePoint = Point()
+        windowManager.defaultDisplay.getSize(windowSizePoint)
         val isLandscape = source.width > source.height
 
         val newWidth: Int
         val newHeight: Int
         if (isLandscape) {
-            newWidth = 1080
-            newHeight = Math.round(newWidth.toFloat() / source.width * source.height)
+            newWidth = windowSizePoint.x
+            newHeight = (newWidth.toFloat() / source.width * source.height).roundToInt()
         } else {
-            newHeight = 2280
-            newWidth = Math.round(newHeight.toFloat() / source.height * source.width)
+            newHeight = windowSizePoint.y
+            newWidth = (newHeight.toFloat() / source.height * source.width).roundToInt()
         }
 
         val result = Bitmap.createScaledBitmap(source, newWidth, newHeight, false)
-
-        if (result != source)
-            source.recycle()
 
         return result
     }
