@@ -64,10 +64,10 @@ class DetailFragment : Fragment() {
             val size = Point()
             display?.getSize(size)
             Picasso.with(context?.applicationContext).load(imageUri!!).into(image)
-            image?.setOnClickListener(View.OnClickListener {
+            image?.setOnClickListener {
                 listener!!.onFragmentInteraction(Uri.parse(imageUri))
                 showSnackbar("Changed wallpaper")
-            })
+            }
         } else {
             Log.v("DetailFragment", "Image uri was null")
         }

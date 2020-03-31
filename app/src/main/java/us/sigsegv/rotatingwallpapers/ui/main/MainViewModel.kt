@@ -2,8 +2,12 @@ package us.sigsegv.rotatingwallpapers.ui.main
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.FileUtils
+import android.os.Handler
+import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
@@ -19,7 +23,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class MainViewModel() : ViewModel() {
+class MainViewModel : ViewModel() {
 
     private var inputPFD: ParcelFileDescriptor? = null
     internal val fileList: ArrayList<File> = ArrayList(20)
@@ -27,9 +31,9 @@ class MainViewModel() : ViewModel() {
     var context: Context? = null
 
 
-    fun load(recyclerAdapter: FilesRecyclerAdapter?){
+    fun load(recyclerAdapter: FilesRecyclerAdapter?) {
         viewModelScope.launch {
-            val loading = async {loadFiles()}
+            val loading = async { loadFiles() }
             loading.await()
             internalRecyclerAdapter = recyclerAdapter
             recyclerAdapter?.notifyDataSetChanged()
@@ -38,16 +42,16 @@ class MainViewModel() : ViewModel() {
 
     private suspend fun loadFiles() = withContext(Dispatchers.IO) {
         val files: Iterator<File>? = context?.filesDir?.listFiles()?.iterator()
-        if(files != null) {
+        if (files != null) {
             var i = 0
-            while(files.hasNext()) {
+            while (files.hasNext()) {
                 fileList.add(files.next())
                 i++
             }
         }
     }
 
-    fun getFileCount() : Int {
+    fun getFileCount(): Int {
         return fileList.size
     }
 
@@ -55,9 +59,9 @@ class MainViewModel() : ViewModel() {
         return fileList[position]
     }
 
-    suspend fun getImageAndSave(data: Intent?) = withContext(Dispatchers.IO) {
+    private suspend fun getImageAndSave(data: Intent?) = withContext(Dispatchers.IO) {
         // Get the file's content URI from the incoming Intent
-        if(context == null) {
+        if (context == null) {
             return@withContext
         }
         data?.also { returnUri ->
@@ -67,7 +71,7 @@ class MainViewModel() : ViewModel() {
              * error log and return.
              */
             val uri: Uri? = returnUri.data
-            if(uri == null) {
+            if (uri == null) {
                 Log.e("MainViewModel", "URI was null")
             }
             try {
@@ -82,36 +86,51 @@ class MainViewModel() : ViewModel() {
             } catch (e: FileNotFoundException) {
                 e.printStackTrace()
                 Log.e("MainViewModel", "File not found")
+                return@withContext
             }
 
             // Get a regular file descriptor for the file
             val fd = inputPFD?.fileDescriptor
-            if(uri != null && fd != null) {
+            if (uri != null && fd != null) {
                 /*
                  * Get the column indexes of the data in the Cursor,
                  * move to the first row in the Cursor, get the data,
                  * and display it.
                  */
-                val cursor = context!!.contentResolver?.query(uri,
-                    null, null, null, null)
-                if(cursor != null) {
+                val cursor = context!!.contentResolver?.query(
+                    uri,
+                    null, null, null, null
+                )
+                if (cursor != null) {
                     val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                     cursor.moveToFirst()
                     val fileName = cursor.getString(nameIndex)
                     cursor.close()
                     val bufferedInputStream = BufferedInputStream(FileInputStream(fd))
                     val file = File(context!!.filesDir, fileName)
-                    if(file.exists()) {
+                    if (fileExists(fd)) {
                         Log.i("MainViewModel", "File exists")
                         bufferedInputStream.close()
                         inputPFD?.close()
                         return@withContext
                     }
-                    val bufferedOutputStream = BufferedOutputStream(FileOutputStream(file))
-                    FileUtils.copy(bufferedInputStream, bufferedOutputStream)
-                    bufferedInputStream.close()
-                    bufferedOutputStream.close()
-                    if(!fileList.contains(file)) {
+                    var bufferedOutputStream: BufferedOutputStream? = null
+                    try {
+                        bufferedOutputStream = BufferedOutputStream(FileOutputStream(file))
+                        FileUtils.copy(bufferedInputStream, bufferedOutputStream)
+                    } catch (ex: IOException) {
+                        Log.e("MainViewModel", "Could not interface with the file")
+                        inputPFD?.close()
+                        return@withContext
+                    } catch (ea: SecurityException) {
+                        Log.e("MainViewModel", "Security violation accessing the file")
+                        inputPFD?.close()
+                        return@withContext
+                    } finally {
+                        bufferedInputStream.close()
+                        bufferedOutputStream?.close()
+                    }
+                    if (!fileList.contains(file)) {
                         fileList.add(file)
                     }
                 }
@@ -121,9 +140,30 @@ class MainViewModel() : ViewModel() {
 
     }
 
+    private fun fileExists(file: FileDescriptor): Boolean {
+        val files: Iterator<File>? = context?.filesDir?.listFiles()?.iterator()
+        if (files != null) {
+            var i = 0
+            while (files.hasNext()) {
+                val existingAbsolutePath: String = files.next().absolutePath
+                val bitmap: Bitmap? = BitmapFactory.decodeFile(existingAbsolutePath)
+                Log.d(
+                    "MainViewModel",
+                    String.format(Locale.ENGLISH, "Saved File Path: %s", existingAbsolutePath)
+                )
+                val givenBitmap: Bitmap? = BitmapFactory.decodeFileDescriptor(file)
+                if (bitmap != null && givenBitmap != null && bitmap.sameAs(givenBitmap)) {
+                    return true
+                }
+                i++
+            }
+        }
+        return false
+    }
+
     fun fetchImageAndSave(data: Intent?, recyclerAdapter: FilesRecyclerAdapter?) {
         viewModelScope.launch {
-            val saving = async {getImageAndSave(data) }
+            val saving = async { getImageAndSave(data) }
             saving.await()
             recyclerAdapter?.notifyItemInserted(fileList.size)
         }
@@ -131,19 +171,19 @@ class MainViewModel() : ViewModel() {
 
     fun deleteFile(file: File) {
         viewModelScope.launch {
+            val index = fileList.indexOf(file)
             val deleting = async { asyncDeleteFile(file) }
             deleting.await()
-            val index = fileList.indexOf(file)
-            if(index != -1) {
-                internalRecyclerAdapter?.notifyItemRemoved(index)
+            if (index != -1) {
                 fileList.removeAt(index)
+                internalRecyclerAdapter?.notifyItemRemoved(index)
             } else {
                 internalRecyclerAdapter?.notifyDataSetChanged()
             }
         }
     }
 
-    suspend fun asyncDeleteFile(file: File) = withContext(Dispatchers.IO) {
+    private suspend fun asyncDeleteFile(file: File) = withContext(Dispatchers.IO) {
         file.delete()
         Log.d("MainViewModel", "File deleted")
     }
@@ -152,7 +192,7 @@ class MainViewModel() : ViewModel() {
         WorkManager.getInstance(context.applicationContext).cancelUniqueWork("Rotation")
     }
 
-    fun startWork(context : Context){
+    fun startWork(context: Context) {
         WorkManager.getInstance(context.applicationContext).cancelAllWork()
         val currentDate = Calendar.getInstance()
         val dueDate = Calendar.getInstance()
@@ -168,8 +208,8 @@ class MainViewModel() : ViewModel() {
         val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
         val saveRequest =
             androidx.work.OneTimeWorkRequest.Builder(
-                RotateWallpaperWorker::class.java
-            )
+                    RotateWallpaperWorker::class.java
+                )
                 .addTag("Rotation")
                 .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
                 .build()

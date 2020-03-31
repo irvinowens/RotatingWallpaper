@@ -1,11 +1,12 @@
 package us.sigsegv.rotatingwallpapers.ui.main
 
+import android.content.DialogInterface
+import androidx.appcompat.app.AlertDialog
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.sample_image_cell_view.view.*
 import us.sigsegv.rotatingwallpapers.R
 import java.io.File
 
@@ -15,10 +16,25 @@ class ImageFileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val imageView: ImageView = itemView.findViewById(R.id.imageView)
     val textView: TextView = itemView.findViewById(R.id.fileDescription)
     init {
-        itemView.setOnLongClickListener(View.OnLongClickListener {
+        itemView.setOnLongClickListener {
             Log.d("ImageFileViewHolder", "Long clicked!")
-            model.deleteFile(file)
+            val dialog = showDialogChoice(it, file)
+            dialog.show()
             true
-        })
+        }
+    }
+
+    private fun showDialogChoice(view: View, file: File) : AlertDialog {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(view.context)
+            .setTitle(R.string.delete_image_title)
+            .setMessage(R.string.delete_image_message)
+            .setNegativeButton(R.string.cancel_button_text
+            ) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(R.string.ok_button_text) { dialog, _ ->
+                model.deleteFile(file)
+            }
+        return builder.create()
     }
 }

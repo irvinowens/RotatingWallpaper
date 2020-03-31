@@ -84,12 +84,10 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
             newWidth = (newHeight.toFloat() / source.height * source.width).roundToInt()
         }
 
-        val result = Bitmap.createScaledBitmap(source, newWidth, newHeight, false)
-
-        return result
+        return Bitmap.createScaledBitmap(source, newWidth, newHeight, false)
     }
 
-    fun startWork(context : Context){
+    private fun startWork(context : Context){
         WorkManager.getInstance(context.applicationContext).cancelAllWork()
         val currentDate = Calendar.getInstance()
         val dueDate = Calendar.getInstance()
