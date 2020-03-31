@@ -1,6 +1,5 @@
 package us.sigsegv.rotatingwallpapers.ui.main
 
-import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 import android.util.Log
 import android.view.View
@@ -34,6 +33,7 @@ class ImageFileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             }
             .setPositiveButton(R.string.ok_button_text) { dialog, _ ->
                 model.deleteFile(file)
+                dialog.dismiss()
             }
         return builder.create()
     }
