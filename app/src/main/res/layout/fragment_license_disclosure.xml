@@ -15,6 +15,16 @@
   ~    limitations under the License.
   -->
 
-<paths>
-    <files-path path="images/" name="Wallpapers" />
-</paths>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.main.LicenseDisclosure">
+    <TextView
+        android:id="@+id/license_content"
+        android:paddingTop="?attr/actionBarSize"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</ScrollView>

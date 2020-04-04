@@ -1,9 +1,17 @@
 /*
  * Copyright (c) 2020. Irvin Owens Jr
  *
- *   This Source Code Form is subject to the terms of the Mozilla Public
- *   License, v. 2.0. If a copy of the MPL was not distributed with this
- *   file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *     Licensed under the Apache License, Version 2.0 (the "License");
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 package us.sigsegv.rotatingwallpapers.ui.main
@@ -18,6 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
 import us.sigsegv.rotatingwallpapers.R
@@ -26,14 +35,10 @@ import us.sigsegv.rotatingwallpapers.R
 private const val ARG_FILE_URI = "file_uri"
 
 /**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [DetailFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [DetailFragment.newInstance] factory method to
- * create an instance of this fragment.
+ * Will display the image that is to be used for the wallpaper
  */
 class DetailFragment : Fragment() {
+    private lateinit var viewModel: MainViewModel
     private var imageUri: String? = null
     private var listener: OnFragmentInteractionListener? = null
     private var image : ImageView? = null
@@ -41,6 +46,7 @@ class DetailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         arguments?.let {
             imageUri = it.getString(ARG_FILE_URI)
             Log.v("DetailFragment", "$imageUri for image")
@@ -67,11 +73,7 @@ class DetailFragment : Fragment() {
         image = activity?.findViewById(R.id.detailImageView)
         if(imageUri != null && image != null) {
             Log.v("DetailFragment", "Loading image")
-            val wm = activity?.windowManager
-            val display = wm?.defaultDisplay
-            val size = Point()
-            display?.getSize(size)
-            Picasso.with(context?.applicationContext).load(imageUri!!).into(image)
+            viewModel.loadScaledImage(context!!.applicationContext, image!!, Uri.parse(imageUri))
             image?.setOnClickListener {
                 listener!!.onFragmentInteraction(Uri.parse(imageUri))
                 showSnackbar("Changed wallpaper")

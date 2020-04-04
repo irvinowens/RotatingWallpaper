@@ -1,9 +1,17 @@
 /*
  * Copyright (c) 2020. Irvin Owens Jr
  *
- *   This Source Code Form is subject to the terms of the Mozilla Public
- *   License, v. 2.0. If a copy of the MPL was not distributed with this
- *   file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *     Licensed under the Apache License, Version 2.0 (the "License");
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 package us.sigsegv.rotatingwallpapers
@@ -26,6 +34,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
 import us.sigsegv.rotatingwallpapers.ui.main.DetailFragment
+import us.sigsegv.rotatingwallpapers.ui.main.LicenseDisclosure
 import us.sigsegv.rotatingwallpapers.ui.main.MainFragment
 import us.sigsegv.rotatingwallpapers.ui.main.MainViewModel
 import kotlin.math.roundToInt
@@ -72,6 +81,14 @@ class MainActivity : AppCompatActivity(),
             true
         }
 
+        R.id.action_show_license -> {
+            (this as AppCompatActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.container, LicenseDisclosure.newInstance())
+                .addToBackStack("license")
+                .commit()
+            true
+        }
+
         else -> {
             // If we got here, the user's action was not recognized.
             // Invoke the superclass to handle it.
@@ -103,34 +120,12 @@ class MainActivity : AppCompatActivity(),
     private fun setWallpaper(uri : Uri) {
         val wallpaperManager = WallpaperManager.getInstance(applicationContext)
         val picassoBitmap = Picasso.with(applicationContext).load(uri).get();
-        val bitmap = transform(picassoBitmap)
+        val bitmap = viewModel.transform(picassoBitmap, applicationContext)
         wallpaperManager.setBitmap(bitmap, null, true,
             WallpaperManager.FLAG_LOCK or
                     WallpaperManager.FLAG_SYSTEM)
         Log.d("RotateWallpaperWorker", "Rotated wallpaper")
         showSnackbar("Wallpaper selected")
-    }
-
-    private fun transform(source: Bitmap): Bitmap {
-        val windowManager: WindowManager = applicationContext
-            .getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val windowSizePoint = Point()
-        windowManager.defaultDisplay.getSize(windowSizePoint)
-        val isLandscape = source.width > source.height
-
-        val newWidth: Int
-        val newHeight: Int
-        if (isLandscape) {
-            newWidth = windowSizePoint.x
-            newHeight = (newWidth.toFloat() / source.width * source.height).roundToInt()
-        } else {
-            newHeight = windowSizePoint.y
-            newWidth = (newHeight.toFloat() / source.height * source.width).roundToInt()
-        }
-
-        val result = Bitmap.createScaledBitmap(source, newWidth, newHeight, false)
-
-        return result
     }
 
     private fun showSnackbar(text: String) {

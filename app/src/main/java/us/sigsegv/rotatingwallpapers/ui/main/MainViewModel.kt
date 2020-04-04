@@ -1,9 +1,17 @@
 /*
  * Copyright (c) 2020. Irvin Owens Jr
  *
- *   This Source Code Form is subject to the terms of the Mozilla Public
- *   License, v. 2.0. If a copy of the MPL was not distributed with this
- *   file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *     Licensed under the Apache License, Version 2.0 (the "License");
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 package us.sigsegv.rotatingwallpapers.ui.main
@@ -12,24 +20,29 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Point
 import android.net.Uri
 import android.os.FileUtils
-import android.os.Handler
-import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import us.sigsegv.rotatingwallpapers.R
 import java.io.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.math.roundToInt
 
 class MainViewModel : ViewModel() {
 
@@ -45,6 +58,29 @@ class MainViewModel : ViewModel() {
             loading.await()
             internalRecyclerAdapter = recyclerAdapter
             recyclerAdapter?.notifyDataSetChanged()
+        }
+    }
+
+    fun loadLicense(ctx: Context, tv: TextView) {
+        viewModelScope.launch {
+            val loading = async { loadLicenseContentIntoTextView(ctx, tv) }
+            loading.await()
+            Log.v("LicenseDisclosure", "Finished loading license")
+        }
+    }
+
+    private suspend fun loadLicenseContentIntoTextView(ctx: Context, tv: TextView) = withContext(Dispatchers.IO) {
+        Log.v("LicenseDisclosure", "Loading the license disclosure")
+        try {
+            val inputStream: InputStream = ctx.resources.openRawResource(R.raw.license)
+            val reader = BufferedReader(InputStreamReader(inputStream))
+            val content = reader.readText()
+            tv.text = content
+            Log.v("LicenseDisclosure", String.format(Locale.ENGLISH, "The content: %s", content))
+            reader.close()
+            inputStream.close()
+        } catch (ex: IOException) {
+            Log.w("LicenseDisclosure", "Couldn't load the license text")
         }
     }
 
@@ -129,10 +165,12 @@ class MainViewModel : ViewModel() {
                     } catch (ex: IOException) {
                         Log.e("MainViewModel", "Could not interface with the file")
                         inputPFD?.close()
+                        file.delete()
                         return@withContext
                     } catch (ea: SecurityException) {
                         Log.e("MainViewModel", "Security violation accessing the file")
                         inputPFD?.close()
+                        file.delete()
                         return@withContext
                     } finally {
                         bufferedInputStream.close()
@@ -200,6 +238,25 @@ class MainViewModel : ViewModel() {
         WorkManager.getInstance(context.applicationContext).cancelUniqueWork("Rotation")
     }
 
+    fun loadScaledImage(context: Context, iv: ImageView, uri: Uri) {
+        viewModelScope.launch {
+            val result = async {
+                loadScaledImageIntoImageView(context ,iv, uri)
+            }
+            result.await()
+            Log.v("MainViewModel", "WYSIWYG version loading started")
+        }
+    }
+
+    private suspend fun loadScaledImageIntoImageView(context: Context, iv: ImageView, uri: Uri) = withContext(Dispatchers.IO) {
+        val picassoBitmap = Picasso.with(context).load(uri).get()
+        val bitmap = transformAndCrop(picassoBitmap, context)
+        launch(Dispatchers.Main) {
+            iv.setImageBitmap(bitmap)
+            Log.v("MainViewModel", "WYSIWYG version loading completed")
+        }
+    }
+
     fun startWork(context: Context) {
         WorkManager.getInstance(context.applicationContext).cancelAllWork()
         val currentDate = Calendar.getInstance()
@@ -225,5 +282,37 @@ class MainViewModel : ViewModel() {
         WorkManager.getInstance(context.applicationContext)
             .enqueue(saveRequest)
         Log.d("MainViewModel", "Work started")
+    }
+
+    private fun transformAndCrop(source: Bitmap, context: Context) :Bitmap {
+        val bitmap = transform(source, context)
+        val windowManager: WindowManager = context
+            .getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowSizePoint = Point()
+        windowManager.defaultDisplay.getSize(windowSizePoint)
+        return if(bitmap.width > windowSizePoint.x || bitmap.height > windowSizePoint.y) {
+            Bitmap.createBitmap(bitmap, 0, 0, windowSizePoint.x, windowSizePoint.y)
+        } else {
+            bitmap
+        }
+    }
+
+    fun transform(source: Bitmap, context: Context): Bitmap {
+        val windowManager: WindowManager = context
+            .getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowSizePoint = Point()
+        windowManager.defaultDisplay.getSize(windowSizePoint)
+        val isLandscape = source.width > source.height
+
+        val newWidth: Int
+        val newHeight: Int
+        if (isLandscape) {
+            newWidth = windowSizePoint.x
+            newHeight = (newWidth.toFloat() / source.width * source.height).roundToInt()
+        } else {
+            newHeight = windowSizePoint.y
+            newWidth = (newHeight.toFloat() / source.height * source.width).roundToInt()
+        }
+        return Bitmap.createScaledBitmap(source, newWidth, newHeight, false)
     }
 }
