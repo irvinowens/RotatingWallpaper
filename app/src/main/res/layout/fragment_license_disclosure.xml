@@ -25,12 +25,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.LicenseDisclosure">
+
     <TextView
         android:id="@+id/license_content"
-        android:paddingTop="?attr/actionBarSize"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/osi_license_content_description"
+        android:paddingStart="16dp"
+        android:paddingTop="?attr/actionBarSize"
+        android:paddingEnd="16dp"
+        android:textColor="@color/design_default_color_on_secondary" />
 </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

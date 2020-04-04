@@ -28,6 +28,7 @@
         android:layout_marginTop="?attr/actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:contentDescription="@string/images_recycler_description"
         tools:layout_editor_absoluteX="125dp"
         tools:layout_editor_absoluteY="236dp" />
 
@@ -38,6 +39,7 @@
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="32dp"
         android:clickable="true"
+        android:contentDescription="@string/add_images_button_description"
         android:src="@android:drawable/ic_input_add"
         android:tint="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"

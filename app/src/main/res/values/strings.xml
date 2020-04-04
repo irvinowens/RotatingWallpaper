@@ -26,4 +26,7 @@
     <string name="ok_button_text">OK</string>
     <string name="button_license">OSS License</string>
     <string name="image_detail_description">The detailed view of the selected image</string>
+    <string name="images_recycler_description">The main list of images available for wallpapers</string>
+    <string name="add_images_button_description">A button for use in adding new images to be displayed as wallpaper from the image gallery</string>
+    <string name="osi_license_content_description">The open-source license for this application</string>
 </resources>
