@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2020. Irvin Owens Jr
   ~
   ~     Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +13,25 @@
   ~    See the License for the specific language governing permissions and
   ~    limitations under the License.
   -->
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.DetailFragment">
 
-    <ImageView
-        android:id="@+id/detailImageView"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:contentDescription="@string/image_detail_description"
-        android:paddingTop="?attr/actionBarSize"
-        tools:src="@tools:sample/avatars" />
-</FrameLayout>
+        tools:context=".ui.main.DetailFragment">
+
+        <ImageView
+            android:id="@+id/detailImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/image_detail_description"
+            android:paddingTop="?attr/actionBarSize"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/avatars" />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

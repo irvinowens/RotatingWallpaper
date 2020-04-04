@@ -32,5 +32,5 @@
     <item android:id="@+id/action_show_license"
         android:icon="@android:drawable/ic_menu_help"
         android:title="@string/button_license"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>
