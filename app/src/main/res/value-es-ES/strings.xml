@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020. Irvin Owens Jr
+  ~
+  ~     Licensed under the Apache License, Version 2.0 (the "License");
+  ~     you may not use this file except in compliance with the License.
+  ~     You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+<resources>
+    <string name="app_name">Fondos de pantalla giratorios</string>
+    <string name="image_view_desc">Vista de imagen</string>
+    <string name="file_name_content">contenido del nombre del archivo</string>
+    <string name="action_pause_work">Pausa</string>
+    <string name="action_start_work">Iniciar</string>
+    <string name="delete_image_title">Eliminar imagen</string>
+    <string name="delete_image_message">¿Seguro que quieres eliminar la imagen de la rotación?</string>
+    <string name="cancel_button_text">Cancelar</string>
+    <string name="ok_button_text">Aceptar</string>
+    <string name="button_license">Licencia de OSS</string>
+    <string name="image_detail_description">La vista detallada de la imagen seleccionada</string>
+    <string name="images_recycler_description">La lista principal de imágenes disponibles para fondos de pantalla</string>
+    <string name="add_images_button_description">Un botón para agregar nuevas imágenes que se mostrarán como fondo de pantalla desde la galería de imágenes</string>
+    <string name="osi_license_content_description">La licencia de código abierto para esta aplicación</string>
+</resources>
