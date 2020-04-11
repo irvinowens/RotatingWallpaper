@@ -30,4 +30,9 @@
     <string name="images_recycler_description">La lista principal de imágenes disponibles para fondos de pantalla</string>
     <string name="add_images_button_description">Un botón para agregar nuevas imágenes que se mostrarán como fondo de pantalla desde la galería de imágenes</string>
     <string name="osi_license_content_description">La licencia de código abierto para esta aplicación</string>
+    <string name="edit_image_title">¿Editar imagen?</string>
+    <string name="edit_image_message">¿Te gustaría editar la imagen para que se ajuste mejor? Deberá iniciar otra aplicación para editar, guardar la imagen editada y luego agregar la imagen recién editada como si fuera una imagen diferente.</string>
+    <string name="set_image_to_background">Establecer fondo de pantalla</string>
+    <string name="set_image_to_background_message">¿Desea configurar esta imagen para que sea su fondo de pantalla actual?</string>
+    <string name="no_application_available_to_edit">No había ninguna aplicación disponible en el dispositivo móvil que pudiera editar la imagen.</string>
 </resources>

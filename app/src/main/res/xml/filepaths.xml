@@ -16,5 +16,5 @@
   -->
 
 <paths>
-    <files-path path="images/" name="Wallpapers" />
+    <files-path path="/" name="Wallpapers" />
 </paths>

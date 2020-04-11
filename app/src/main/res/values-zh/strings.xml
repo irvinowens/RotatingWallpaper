@@ -30,4 +30,9 @@
     <string name="images_recycler_description">可用于墙纸的图像的主要列表</string>
     <string name="add_images_button_description">用于添加新图像的按钮，该图像将显示为图像库中的墙纸</string>
     <string name="osi_license_content_description">此应用程序的开源许可证</string>
+    <string name="edit_image_title">编辑图片？</string>
+    <string name="edit_image_message">您要编辑图像以使其更合适吗？ 您将需要启动另一个应用程序进行编辑，保存已编辑的图像，然后将新编辑的图片当作另一张图片添加。</string>
+    <string name="set_image_to_background">设置墙纸</string>
+    <string name="set_image_to_background_message">您想将此图像设置为当前的主屏幕墙纸吗？</string>
+    <string name="no_application_available_to_edit">移动设备上没有可以编辑图像的应用程序。</string>
 </resources>

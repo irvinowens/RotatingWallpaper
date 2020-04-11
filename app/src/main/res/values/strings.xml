@@ -29,4 +29,9 @@
     <string name="images_recycler_description">The main list of images available for wallpapers</string>
     <string name="add_images_button_description">A button for use in adding new images to be displayed as wallpaper from the image gallery</string>
     <string name="osi_license_content_description">The open-source license for this application</string>
+    <string name="edit_image_title">Edit Image?</string>
+    <string name="edit_image_message">Would you like to edit the image so that it fits better? You will need to launch another app to edit, save the edited image and then add the newly edited picture as though it were a different image.</string>
+    <string name="set_image_to_background">Set Wallpaper</string>
+    <string name="set_image_to_background_message">Would you like to set this image to be your current home screen wallpaper?</string>
+    <string name="no_application_available_to_edit">There was no application available on the mobile device that could edit the image.</string>
 </resources>
