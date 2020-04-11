@@ -15,6 +15,7 @@
   ~    limitations under the License.
   -->
 <resources>
+    <!-- es-ES -->
     <string name="app_name">Fondos de pantalla giratorios</string>
     <string name="image_view_desc">Vista de imagen</string>
     <string name="file_name_content">contenido del nombre del archivo</string>

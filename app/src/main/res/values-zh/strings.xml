@@ -15,6 +15,7 @@
   ~    limitations under the License.
   -->
 <resources>
+    <!-- zh-CN -->
     <string name="app_name">轮换壁纸</string>
     <string name="image_view_desc">图像视图</string>
     <string name="file_name_content">文件名内容</string>
