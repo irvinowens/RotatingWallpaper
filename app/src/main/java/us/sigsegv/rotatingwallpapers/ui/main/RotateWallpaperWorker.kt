@@ -18,6 +18,7 @@ package us.sigsegv.rotatingwallpapers.ui.main
 
 import android.app.WallpaperManager
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.util.Log
@@ -66,7 +67,7 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
                 val min = 0
                 val max = dir.size - 1
                 val randomInt = random.nextInt((max - min) + 1) + min
-                val bitmap = transform(Picasso.with(applicationContext).load(File(applicationContext.filesDir,
+                val bitmap = transform(Picasso.get().load(File(applicationContext.filesDir,
                     dir[randomInt]
                 )).get())
                 wallpaperManager.setBitmap(bitmap, null, true,
@@ -83,11 +84,25 @@ class RotateWallpaperWorker(appContext: Context, workerParams: WorkerParameters)
         }
     }
 
+    fun adjustWindowSizePointForLandscape(windowSizePoint: Point) : Point {
+        return if(applicationContext.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val tmpX = windowSizePoint.x
+            val tmpY = windowSizePoint.y
+            windowSizePoint.x = tmpY
+            windowSizePoint.y = tmpX
+            windowSizePoint
+        } else {
+            windowSizePoint
+        }
+    }
+
     private fun transform(source: Bitmap): Bitmap {
         val windowManager: WindowManager = applicationContext
             .getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val windowSizePoint = Point()
         windowManager.defaultDisplay.getSize(windowSizePoint)
+        // need to make everything aware of orientation
+        adjustWindowSizePointForLandscape(windowSizePoint)
         val isLandscape = source.width > source.height
 
         val newWidth: Int

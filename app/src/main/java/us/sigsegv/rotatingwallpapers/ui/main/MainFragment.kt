@@ -23,6 +23,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,6 +43,7 @@ class MainFragment : Fragment() {
     private lateinit var recyclerAdapter: FilesRecyclerAdapter
     private var recyclerView: RecyclerView? = null
     private var fab : FloatingActionButton? = null
+    private var progressBar: FrameLayout? = null
     private lateinit var requestFileIntent: Intent
 
     override fun onCreateView(
@@ -73,6 +76,8 @@ class MainFragment : Fragment() {
         }
         recyclerView = activity?.findViewById(R.id.imagesRecycler)
         fab = activity?.findViewById(R.id.floatingActionButton)
+        progressBar = activity?.findViewById(R.id.progressBar)
+        viewModel.progressBar = progressBar
         if(fab != null) {
             fab?.setOnClickListener(View.OnClickListener {
                 requestImage()
@@ -117,6 +122,7 @@ class MainFragment : Fragment() {
             return
         }
         if (requestCode == 716) {
+            progressBar?.visibility = View.VISIBLE
             viewModel.fetchImageAndSave(data, recyclerAdapter)
             Log.v("MainFragment", "Adding image")
         } else {

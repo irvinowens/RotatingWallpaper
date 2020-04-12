@@ -34,9 +34,7 @@ class FilesRecyclerAdapter(val model: MainViewModel) : RecyclerView.Adapter<Imag
     }
 
     override fun getItemCount(): Int {
-        val count = model.getFileCount()
-        Log.d("FilesRecyclerAdapter", "File count $count")
-        return count
+        return model.getFileCount()
     }
 
     override fun onBindViewHolder(holder: ImageFileViewHolder, position: Int) {
@@ -45,7 +43,7 @@ class FilesRecyclerAdapter(val model: MainViewModel) : RecyclerView.Adapter<Imag
             holder.file = f
             holder.model = model
             holder.textView.text = f.name
-            Picasso.with(holder.imageView.context)
+            Picasso.get()
                 .load(f)
                 .into(holder.imageView)
             holder.itemView.setOnClickListener {

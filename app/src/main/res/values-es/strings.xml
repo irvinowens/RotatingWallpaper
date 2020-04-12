@@ -35,4 +35,9 @@
     <string name="set_image_to_background">Establecer fondo de pantalla</string>
     <string name="set_image_to_background_message">¿Desea configurar esta imagen para que sea su fondo de pantalla actual?</string>
     <string name="no_application_available_to_edit">No había ninguna aplicación disponible en el dispositivo móvil que pudiera editar la imagen.</string>
+    <string name="progress_indicator_description">Realizar la acción solicitada</string>
+    <string name="deleting_file_progress_message">Eliminando archivo…</string>
+    <string name="searching_for_duplicates_progress_description">Buscando imágenes duplicadas…</string>
+    <string name="screen_size_text">El tamaño de la pantalla vertical es: %1$dpx de alto por %2$dpx de ancho</string>
+    <string name="image_size_text">El tamaño original de esta imagen es de %1$dpx de alto por %2$dpx de ancho</string>
 </resources>

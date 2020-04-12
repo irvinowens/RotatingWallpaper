@@ -18,16 +18,21 @@ package us.sigsegv.rotatingwallpapers.ui.main
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.FileUtils
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,16 +45,21 @@ import kotlinx.coroutines.withContext
 import us.sigsegv.rotatingwallpapers.R
 import java.io.*
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
 class MainViewModel : ViewModel() {
 
     private var inputPFD: ParcelFileDescriptor? = null
-    internal val fileList: ArrayList<File> = ArrayList(20)
+    internal val fileList: CopyOnWriteArrayList<File> = CopyOnWriteArrayList()
     private var internalRecyclerAdapter: FilesRecyclerAdapter? = null
     var context: Context? = null
+    var progressBar : FrameLayout? = null
+
+    fun setProgressIndicator(indicator: FrameLayout) {
+        progressBar = indicator
+    }
 
 
     fun load(recyclerAdapter: FilesRecyclerAdapter?) {
@@ -193,12 +203,12 @@ class MainViewModel : ViewModel() {
             while (files.hasNext()) {
                 val existingAbsolutePath: String = files.next().absolutePath
                 val bitmap: Bitmap? = BitmapFactory.decodeFile(existingAbsolutePath)
-                Log.d(
-                    "MainViewModel",
-                    String.format(Locale.ENGLISH, "Saved File Path: %s", existingAbsolutePath)
-                )
                 val givenBitmap: Bitmap? = BitmapFactory.decodeFileDescriptor(file)
                 if (bitmap != null && givenBitmap != null && bitmap.sameAs(givenBitmap)) {
+                    Log.d(
+                        "MainViewModel",
+                        String.format(Locale.ENGLISH, "Existing File Path: %s", existingAbsolutePath)
+                    )
                     return true
                 }
                 i++
@@ -207,25 +217,44 @@ class MainViewModel : ViewModel() {
         return false
     }
 
+    fun getPortraitScreenSize(context: Context): Point {
+        val windowManager: WindowManager = context
+            .getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowSizePoint = Point()
+        windowManager.defaultDisplay.getSize(windowSizePoint)
+        // turn everything if landscape
+        adjustWindowSizePointForLandscape(windowSizePoint)
+        return windowSizePoint
+    }
+
     fun fetchImageAndSave(data: Intent?, recyclerAdapter: FilesRecyclerAdapter?) {
         viewModelScope.launch {
+            progressBar?.findViewById<TextView>(R.id.progressTextView)?.text = context?.getText(R.string.searching_for_duplicates_progress_description)
+            progressBar?.visibility = View.VISIBLE
             val saving = async { getImageAndSave(data) }
             saving.await()
             recyclerAdapter?.notifyItemInserted(fileList.size)
+            progressBar?.visibility = View.GONE
         }
     }
 
     fun deleteFile(file: File) {
         viewModelScope.launch {
             val index = fileList.indexOf(file)
+            if(index == -1) {
+                return@launch
+            }
+            progressBar?.findViewById<TextView>(R.id.progressTextView)?.text = context?.getText(R.string.deleting_file_progress_message)
+            progressBar?.visibility = View.VISIBLE
             val deleting = async { asyncDeleteFile(file) }
             deleting.await()
             if (index != -1) {
-                fileList.removeAt(index)
                 internalRecyclerAdapter?.notifyItemRemoved(index)
+                fileList.removeAt(index)
             } else {
                 internalRecyclerAdapter?.notifyDataSetChanged()
             }
+            progressBar?.visibility = View.GONE
         }
     }
 
@@ -238,19 +267,22 @@ class MainViewModel : ViewModel() {
         WorkManager.getInstance(context.applicationContext).cancelUniqueWork("Rotation")
     }
 
-    fun loadScaledImage(context: Context, iv: ImageView, uri: Uri) {
+    fun loadScaledImage(context: Context, iv: ImageView, uri: Uri, imageSizeTextView: TextView?) {
         viewModelScope.launch {
             val result = async {
                 loadScaledImageIntoImageView(context ,iv, uri)
             }
             result.await()
+            val bitmapSize = (iv.tag as Point)
+            imageSizeTextView?.text = context.getString(R.string.image_size_text, bitmapSize.y, bitmapSize.x)
             Log.v("MainViewModel", "WYSIWYG version loading started")
         }
     }
 
     private suspend fun loadScaledImageIntoImageView(context: Context, iv: ImageView, uri: Uri) = withContext(Dispatchers.IO) {
-        val picassoBitmap = Picasso.with(context).load(uri).get()
+        val picassoBitmap = Picasso.get().load(uri).get()
         val bitmap = transformAndCrop(picassoBitmap, context)
+        iv.tag = Point(picassoBitmap.width, picassoBitmap.height)
         launch(Dispatchers.Main) {
             iv.setImageBitmap(bitmap)
             Log.v("MainViewModel", "WYSIWYG version loading completed")
@@ -297,11 +329,25 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    private fun adjustWindowSizePointForLandscape(windowSizePoint: Point) : Point {
+        return if(context?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val tmpX = windowSizePoint.x
+            val tmpY = windowSizePoint.y
+            windowSizePoint.x = tmpY
+            windowSizePoint.y = tmpX
+            windowSizePoint
+        } else {
+            windowSizePoint
+        }
+    }
+
     fun transform(source: Bitmap, context: Context): Bitmap {
         val windowManager: WindowManager = context
             .getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val windowSizePoint = Point()
         windowManager.defaultDisplay.getSize(windowSizePoint)
+        // turn everything if landscape
+        adjustWindowSizePointForLandscape(windowSizePoint)
         val isLandscape = source.width > source.height
 
         val newWidth: Int

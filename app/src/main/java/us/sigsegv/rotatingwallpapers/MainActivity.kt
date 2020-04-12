@@ -17,9 +17,7 @@
 package us.sigsegv.rotatingwallpapers
 
 import android.app.WallpaperManager
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Point
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -28,7 +26,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
@@ -37,7 +34,6 @@ import us.sigsegv.rotatingwallpapers.ui.main.DetailFragment
 import us.sigsegv.rotatingwallpapers.ui.main.LicenseDisclosure
 import us.sigsegv.rotatingwallpapers.ui.main.MainFragment
 import us.sigsegv.rotatingwallpapers.ui.main.MainViewModel
-import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity(),
@@ -53,6 +49,17 @@ class MainActivity : AppCompatActivity(),
         Log.v("MainActivity", "User did something on fragment")
         handler.post {
             setWallpaper(uri)
+        }
+    }
+
+    /**
+     * Dispatch incoming result to the correct fragment.
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == Constants.SAVE_EDITED_FILE) {
+            val editedImage: Uri? = data?.data
+            Log.v("MainActivity", "Edited Image URI $editedImage")
         }
     }
 
@@ -119,7 +126,7 @@ class MainActivity : AppCompatActivity(),
 
     private fun setWallpaper(uri : Uri) {
         val wallpaperManager = WallpaperManager.getInstance(applicationContext)
-        val picassoBitmap = Picasso.with(applicationContext).load(uri).get();
+        val picassoBitmap = Picasso.get().load(uri).get()
         val bitmap = viewModel.transform(picassoBitmap, applicationContext)
         wallpaperManager.setBitmap(bitmap, null, true,
             WallpaperManager.FLAG_LOCK or
@@ -135,4 +142,9 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    class Constants {
+        companion object {
+            val SAVE_EDITED_FILE = 12721;
+        }
+    }
 }

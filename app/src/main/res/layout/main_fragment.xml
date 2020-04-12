@@ -45,4 +45,31 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:focusable="true" />
+
+    <FrameLayout
+        android:id="@+id/progressBar"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDarkSemiOpaque">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+        <TextView
+            android:id="@+id/progressTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/average_margin_and_toolbar"
+            android:layout_gravity="center_horizontal"
+            android:textAlignment="center"
+            tools:text="Ensuring no duplicates..."
+            android:contentDescription="@string/progress_indicator_description"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="24sp" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -35,4 +35,9 @@
     <string name="set_image_to_background">设置墙纸</string>
     <string name="set_image_to_background_message">您想将此图像设置为当前的主屏幕墙纸吗？</string>
     <string name="no_application_available_to_edit">移动设备上没有可以编辑图像的应用程序。</string>
+    <string name="progress_indicator_description">执行请求的动作</string>
+    <string name="deleting_file_progress_message">删除文件…</string>
+    <string name="searching_for_duplicates_progress_description">搜索重复的图像…</string>
+    <string name="screen_size_text">您的肖像屏幕尺寸为：高%1$d像素，宽%2$d像素</string>
+    <string name="image_size_text">这张图片的原始尺寸是%1$d像素高x %2$d像素宽</string>
 </resources>

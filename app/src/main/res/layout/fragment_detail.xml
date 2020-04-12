@@ -33,5 +33,22 @@
             android:paddingTop="?attr/actionBarSize"
             android:scaleType="centerCrop"
             tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/imageSizeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/average_margin_and_toolbar"
+            android:layout_gravity="center_horizontal"
+            android:textAlignment="center"
+            tools:text="Image size 2863px high by 2635px wide"
+            android:contentDescription="@string/progress_indicator_description"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowDx="1.5"
+            android:shadowDy="1.3"
+            android:shadowRadius="1.6"
+            android:textSize="24sp" />
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,10 +16,6 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#F57F17</color>
-    <color name="colorPrimaryDark">#BF360C</color>
-    <color name="colorAccent">#01579B</color>
-    <color name="titleText">#0F0F0F</color>
-    <color name="colorPrimaryDarkSemiOpaque">#DD0F0F0F</color>
-    <color name="white">#FFFFFF</color>
+    <dimen name="average_margin">16dp</dimen>
+    <dimen name="average_margin_and_toolbar">64dp</dimen>
 </resources>

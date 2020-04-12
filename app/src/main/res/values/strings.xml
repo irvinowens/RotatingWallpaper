@@ -34,4 +34,9 @@
     <string name="set_image_to_background">Set Wallpaper</string>
     <string name="set_image_to_background_message">Would you like to set this image to be your current home screen wallpaper?</string>
     <string name="no_application_available_to_edit">There was no application available on the mobile device that could edit the image.</string>
+    <string name="progress_indicator_description">Performing the requested action</string>
+    <string name="deleting_file_progress_message">Deleting file…</string>
+    <string name="searching_for_duplicates_progress_description">Searching for duplicate images…</string>
+    <string name="screen_size_text">Your portrait screen size is: %1$dpx high by %2$dpx wide</string>
+    <string name="image_size_text">This image\'s original size is %1$dpx high by %2$dpx wide</string>
 </resources>
