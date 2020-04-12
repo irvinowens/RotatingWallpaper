@@ -233,8 +233,13 @@ class MainViewModel : ViewModel() {
             progressBar?.visibility = View.VISIBLE
             val saving = async { getImageAndSave(data) }
             saving.await()
-            recyclerAdapter?.notifyItemInserted(fileList.size)
-            progressBar?.visibility = View.GONE
+            if(recyclerAdapter == null) {
+                internalRecyclerAdapter?.notifyDataSetChanged()
+                progressBar?.visibility = View.GONE
+            } else {
+                recyclerAdapter.notifyItemInserted(fileList.size)
+                progressBar?.visibility = View.GONE
+            }
         }
     }
 

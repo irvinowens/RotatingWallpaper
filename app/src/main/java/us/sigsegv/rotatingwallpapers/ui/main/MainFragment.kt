@@ -40,7 +40,7 @@ class MainFragment : Fragment() {
     }
 
     private lateinit var viewModel: MainViewModel
-    private lateinit var recyclerAdapter: FilesRecyclerAdapter
+    lateinit var recyclerAdapter: FilesRecyclerAdapter
     private var recyclerView: RecyclerView? = null
     private var fab : FloatingActionButton? = null
     private var progressBar: FrameLayout? = null

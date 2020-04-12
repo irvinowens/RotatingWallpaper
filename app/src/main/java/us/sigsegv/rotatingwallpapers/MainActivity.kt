@@ -22,10 +22,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Parcelable
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
@@ -122,6 +124,18 @@ class MainActivity : AppCompatActivity(),
         }
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         viewModel.context = this
+        when (intent?.action) {
+            Intent.ACTION_SEND -> {
+                if (intent.type?.startsWith("image/") == true) {
+                    handleSendImage(intent) // Handle image being sent
+                }
+            }
+        }
+    }
+
+    private fun handleSendImage(intent: Intent) {
+        intent.data = (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)
+        viewModel.fetchImageAndSave(intent, recyclerAdapter = null)
     }
 
     private fun setWallpaper(uri : Uri) {
